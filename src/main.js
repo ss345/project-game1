@@ -21,8 +21,6 @@ window.addEventListener('load', () => {
     const endingScreen = document.getElementById('happy-ending-screen');
     const hud = document.getElementById('hud');
 
-    const hud = document.getElementById('hud');
-
     // 1. Data State (Must be declared before functions using it)
     let selectedMonsters = [];
 
