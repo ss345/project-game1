@@ -1,0 +1,47 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fluffy Body Base -->
+  <defs>
+    <filter id="furry">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
+    </filter>
+  </defs>
+
+  <!-- Tail -->
+  <path d="M160 140 Q190 110 170 80 Q150 60 140 100" stroke="#eee" stroke-width="15" fill="none" stroke-linecap="round"/>
+
+  <!-- Body (Fluffy Outline) -->
+  <path d="M60 150 Q40 150 40 120 Q40 90 60 80 L60 60 L40 50 L70 40 L90 50 L110 40 L140 50 L120 60 L120 80 Q140 90 140 120 Q140 150 120 150 Z" 
+        fill="#fff" stroke="#ddd" stroke-width="2" />
+  
+  <!-- Head (Fluffy) -->
+  <g transform="translate(90, 70)">
+     <!-- Ears with fur tips -->
+     <path d="M-40 -20 L-50 -50 L-20 -35 Z" fill="#fff" stroke="#ddd" stroke-width="2"/>
+     <path d="M40 -20 L50 -50 L20 -35 Z" fill="#fff" stroke="#ddd" stroke-width="2"/>
+     
+     <!-- Face Shape -->
+     <path d="M-45 -20 Q-55 10 -30 25 Q0 35 30 25 Q55 10 45 -20 Q45 -40 0 -45 Q-45 -40 -45 -20" 
+           fill="#fff" stroke="#ddd" stroke-width="2"/>
+     
+     <!-- Big Cute Eyes -->
+     <circle cx="-15" cy="-5" r="8" fill="#4a3"/>
+     <circle cx="-12" cy="-8" r="3" fill="#fff"/>
+     
+     <circle cx="15" cy="-5" r="8" fill="#4a3"/>
+     <circle cx="18" cy="-8" r="3" fill="#fff"/>
+     
+     <!-- Nose & Mouth -->
+     <path d="M-3 5 L3 5 L0 8 Z" fill="#f99"/>
+     <path d="M0 8 Q-5 15 -10 10 M0 8 Q5 15 10 10" stroke="#555" stroke-width="1.5" fill="none"/>
+     
+     <!-- Cheeks -->
+     <circle cx="-25" cy="5" r="6" fill="#fcc" opacity="0.5"/>
+     <circle cx="25" cy="5" r="6" fill="#fcc" opacity="0.5"/>
+  </g>
+
+  <!-- Paws (Up in the air happy style) -->
+  <path d="M50 90 Q30 70 40 60 Q50 50 60 70" fill="#fff" stroke="#ddd" stroke-width="2"/>
+  <path d="M130 90 Q150 70 140 60 Q130 50 120 70" fill="#fff" stroke="#ddd" stroke-width="2"/>
+
+</svg>

@@ -1,0 +1,281 @@
+:root {
+    --primary-color: #ffcc00;
+    --bg-color: #222;
+    --text-color: #fff;
+    --font-stack: "Helvetica Neue", Arial, sans-serif;
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-stack);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#game-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+    /* Let clicks pass through to canvas when possible */
+}
+
+/* Screens */
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
+    transition: opacity 0.3s ease;
+}
+
+.screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+h1 {
+    font-size: 3rem;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+    margin-bottom: 2rem;
+}
+
+.btn-primary {
+    background: linear-gradient(to bottom, #ffeb3b, #fbc02d);
+    border: none;
+    border-radius: 8px;
+    padding: 1rem 3rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s;
+}
+
+.btn-primary:active {
+    transform: scale(0.95);
+}
+
+.btn-primary:disabled {
+    background: #555;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: #666;
+    border: 2px solid #888;
+    border-radius: 8px;
+    padding: 0.8rem 2rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s;
+}
+
+.btn-secondary:active {
+    transform: scale(0.95);
+}
+
+.btn-small {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: #444;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 100;
+}
+
+/* HUD */
+#hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#hud.hidden {
+    display: none;
+}
+
+#score-display {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 0 #000;
+}
+
+#ex-gauge-container {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 200px;
+    height: 30px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #fff;
+    border-radius: 15px;
+    overflow: hidden;
+    pointer-events: auto;
+    /* Enable click */
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#ex-gauge-container:active {
+    transform: scale(0.95);
+}
+
+#ex-gauge-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #f00, #ff0);
+    transition: width 0.2s;
+    box-shadow: 0 0 10px #ff0;
+}
+
+#ex-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #000;
+    z-index: 2;
+}
+
+/* Deck Select */
+#monster-list {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.monster-card {
+    width: 100px;
+    height: 140px;
+    background: #444;
+    border: 3px solid #666;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.monster-card.selected {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+@keyframes jump {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Story Overlay */
+#story-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    transition: opacity 0.5s ease;
+    pointer-events: none; /* Text shouldn't block, but JS blocking is global */
+}
+
+#story-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#story-title {
+    font-size: 4rem;
+    color: #ffcc00;
+    text-shadow: 0 0 20px #ff0000;
+    margin-bottom: 20px;
+    animation: jump 0.5s infinite alternate;
+}
+
+#story-subtitle {
+    font-size: 2rem;
+    color: #fff;
+    text-shadow: 2px 2px 4px #000;
+}

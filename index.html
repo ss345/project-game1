@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Oreca Medal Web</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+
+        <div id="ui-layer">
+            <!-- HUD -->
+            <div id="hud" class="hidden">
+                <div id="score-display">メダル: <span id="medal-count">100</span></div>
+                <div id="ex-gauge-container">
+                    <div id="ex-gauge-bar"></div>
+                    <span id="ex-label">EXゲージ</span>
+                </div>
+            </div>
+
+            <!-- Screens -->
+            <div id="title-screen" class="screen">
+                <h1>オレカバトル風<br>メダルゲーム</h1>
+                <button id="start-btn" class="btn-primary">ゲームスタート</button>
+            </div>
+
+            <div id="deck-select-screen" class="screen hidden">
+                <h2>チームをえらんでね</h2>
+                <div id="monster-list"></div>
+                <button id="battle-start-btn" class="btn-primary" disabled>バトルスタート！</button>
+            </div>
+
+            <div id="result-screen" class="screen hidden">
+                <h2>けっか</h2>
+                <p>かくとくメダル: <span id="result-medals">0</span> まい</p>
+                <button id="return-title-btn" class="btn-primary">タイトルへ</button>
+            </div>
+
+            <div id="game-over-screen" class="screen hidden">
+                <h2>ゲームオーバー</h2>
+                <p>メダルがなくなってしまった...</p>
+                <button id="game-over-btn" class="btn-primary">タイトルへ</button>
+            </div>
+
+            <div id="happy-ending-screen" class="screen hidden">
+                <h2>おめでとう！</h2>
+                <p>香南市の平和は守られた！</p>
+                <button id="ending-btn" class="btn-primary">ありがとう！</button>
+            </div>
+
+            <div id="pause-screen" class="screen hidden">
+                <h2>一時停止</h2>
+                <button id="resume-btn" class="btn-secondary">再開</button>
+                <button id="quit-btn" class="btn-secondary">タイトルへ</button>
+            </div>
+        </div>
+
+        <div id="story-overlay" class="hidden">
+            <h2 id="story-title"></h2>
+            <p id="story-subtitle"></p>
+        </div>
+    </div>
+    <script type="module" src="src/main.js"></script>
+</body>
+
+</html>

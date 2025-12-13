@@ -1,0 +1,16 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Robe -->
+  <circle cx="50" cy="50" r="45" fill="#309" stroke="#fff" stroke-width="2"/>
+  
+  <!-- Face (Shadowed) -->
+  <circle cx="50" cy="55" r="20" fill="#000"/>
+  <!-- Glowing Eyes -->
+  <circle cx="43" cy="55" r="3" fill="#ff0"/>
+  <circle cx="57" cy="55" r="3" fill="#ff0"/>
+  
+  <!-- Hat -->
+  <path d="M20 50 L80 50 L50 5 Z" fill="#60a" stroke="#fff" stroke-width="2"/>
+  <path d="M20 50 Q50 60 80 50" fill="#60a"/>
+  <!-- Star on Hat -->
+  <polygon points="50,15 53,23 60,23 55,28 57,35 50,30 43,35 45,28 40,23 47,23" fill="#ff0"/>
+</svg>

@@ -1,0 +1,63 @@
+# Oreca Medal Web - Implementation Plan
+
+## Goal Description
+Create a web-based game inspired by "Monster Retsuden Oreca Battle 2: Pandora's Medal".
+The game will be a **Medal Shooting RPG**.
+Players use medals as ammo to shoot scrolling targets and battle boss monsters.
+It will feature "Oreca" elements like Monster Summoning (deck selection) and EX Attacks (triggered by gauge).
+
+## User Review Required
+> [!IMPORTANT]
+> The game is a "Medal Shooting" game, not the turn-based command battle of the original Oreca Battle RPG.
+> Controls will be optimized for Touch (Mobile/Tablet) and Mouse (PC).
+
+## Proposed Changes
+
+### Core System
+#### [NEW] [index.html](file:///Users/SSS/.gemini/antigravity/brain/46791868-e271-4aaa-aa5e-ec0ad1d797a7/index.html)
+- Main entry point.
+- Canvas container for the game.
+- UI Overlays for Deck Selection and Results.
+
+#### [NEW] [style.css](file:///Users/SSS/.gemini/antigravity/brain/46791868-e271-4aaa-aa5e-ec0ad1d797a7/style.css)
+- Responsive full-screen design.
+- Animations for UI elements (Roulette, Cut-ins).
+
+#### [NEW] [src/main.js](file:///Users/SSS/.gemini/antigravity/brain/46791868-e271-4aaa-aa5e-ec0ad1d797a7/src/main.js)
+- Game initialization.
+- Asset loading.
+- Event listeners (Touch/Click).
+
+### Game Engine
+#### [NEW] [src/game.js](file:///Users/SSS/.gemini/antigravity/brain/46791868-e271-4aaa-aa5e-ec0ad1d797a7/src/game.js)
+- Main Game Loop (`update`, `draw`).
+- State Management (Title, Battle, Result).
+
+#### [NEW] [src/entities.js](file:///Users/SSS/.gemini/antigravity/brain/46791868-e271-4aaa-aa5e-ec0ad1d797a7/src/entities.js)
+- `Bullet`: Medals shot by player.
+- `Target`: Floating items/enemies.
+- `Boss`: Main enemy with HP and attack patterns.
+- `Particle`: Visual effects for hits.
+
+#### [NEW] [src/mechanics.js](file:///Users/SSS/.gemini/antigravity/brain/46791868-e271-4aaa-aa5e-ec0ad1d797a7/src/mechanics.js)
+- `MedalSystem`: Manage ammo/score.
+- `SummonSystem`: Handle player's monster team (Stats, Skills).
+- `EXSystem`: Gauge management and Special Move trigger.
+
+### Assets
+- Placeholder graphics generated via CSS/Canvas drawing or generated images if needed.
+- Audio (optional, if requested).
+
+## Verification Plan
+
+### Automated Tests
+- None planned for initial prototype.
+
+### Manual Verification
+1.  **Responsive Check**: Open in Chrome DevTools Device Mode (iPhone, iPad, Desktop).
+2.  **Gameplay Loop**:
+    - Start Game -> Select Monsters.
+    - Shoot Targets -> Collect Medals.
+    - Fill EX Gauge -> Trigger EX Attack.
+    - Defeat Boss -> Result Screen.
+3.  **Performance**: Ensure 60fps on standard devices.

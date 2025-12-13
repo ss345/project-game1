@@ -1,0 +1,45 @@
+# Project: Oreca Battle Style Web Game
+
+- [x] Research "Monster Retsuden Oreca Battle 2: Pandora's Medal" mechanics
+- [x] Create Implementation Plan
+- [x] Initialize Project Structure (HTML/CSS/JS)
+- [x] Implement Core Game Engine
+    - [x] Battle System Logic
+    - [x] Monster Stat/Card System
+    - [/] Roulette/Command System (Simulated via EX Summon)
+- [x] Implement UI/UX
+    - [x] Responsive Layout (Mobile/Tablet/PC)
+    - [x] Animations and Visual Effects
+- [x] Create Game Assets (Monsters, UI elements) - *Implemented programmatically*
+- [x] Verify Gameplay and Responsive Design
+- [x] Implement Security Measures
+    - [x] Add Content Security Policy
+    - [x] Create Deployment Security Guide
+- [x] Create Deployment Guide (GitHub Pages)
+- [x] Localize Text for Children (Japanese Hiragana/Katakana)
+- [x] Implement Konan City Backgrounds
+    - [x] Generate 5 Background Images
+    - [x] Implement Random Background Selection
+- [x] Replace Targets with Monsters
+    - [x] Generate Monster Images
+    - [x] Update Target Rendering Logic
+- [x] Implement Game Over Screen
+    - [x] Add UI HTML/CSS
+    - [x] Add Logic for 0 Medals & 0 Bullets
+- [x] Implement Pause/Quit Functionality
+    - [x] Add Pause Button & Menu UI
+    - [x] Implement Pause Logic in Game Loop
+- [x] Implement Stage System
+    - [x] Track Medals Spent
+    - [x] Implement Stage Clear Target (Speed x3, Variable HP/Reward)
+    - [x] Add Flashy Spawn Effect
+    - [x] Stage Progression Logic (Stage 1-5)
+- [x] Adjust Game Balance
+    - [x] Change Stage 3 Reward to 500
+- [x] Implement Stage 5 Ending
+    - [x] Create Happy Happy Cat Animation (Simulated Video)
+    - [x] Trigger on Stage 5 Clear
+- [x] Implement Story Elements
+    - [x] Add Opening "Save Konan City" Sequence
+    - [x] Map Stages to Specific Backgrounds & Names
+    - [x] Display Stage Name on Entry

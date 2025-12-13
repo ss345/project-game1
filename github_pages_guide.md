@@ -1,0 +1,51 @@
+# GitHub Pages Deployment Guide
+
+このゲームをGitHub経由でWebに公開し、誰でもプレイできるようにする手順です。
+GitHub Pagesを使用すると、無料でこのゲームをホスティング（公開）できます。
+
+## 1. 準備 (Preparation)
+- **GitHubアカウント**: まだ持っていない場合は [GitHub](https://github.com/) で作成してください。
+- **ファイル一式**: gameフォルダ内の以下のファイルを全てアップロードしてください。
+    - `index.html` (必須: ゲームの入り口)
+    - `style.css` (必須: デザイン設定)
+    - `assets` フォルダ (背景などの画像が入っています)
+    - `src` フォルダ (全てのプログラムが入っています)
+        - `src/main.js`
+        - `src/game.js`
+        - `src/entities.js`
+        - `src/mechanics.js`
+    
+    *※ `github_pages_guide.md` や `task.md` などの説明書ファイルはアップロードしなくてもゲームは動きますが、一緒にアップロードしても問題ありません。*
+
+## 2. リポジトリの作成 (Create Repository)
+1. GitHubにログインし、右上の「+」アイコンから **New repository** を選択します。
+2. **Repository name** に名前を入力します（例: `oreca-medal-web`）。
+3. **Public**（公開）を選択します。
+4. **Create repository** をクリックします。
+
+## 3. ファイルのアップロード (Upload Files)
+1. 作成されたリポジトリ画面で、**uploading an existing file** というリンクをクリックします。
+2. 作成した全てのファイル（`index.html`, `style.css`）と `src` フォルダをドラッグ＆ドロップします。
+   *注: ブラウザからのアップロードでフォルダ構造が維持されない場合は、GitコマンドまたはGitHub Desktopを使用することを推奨しますが、簡単な方法として「Add file」>「Create new file」で `src/game.js` のようにパスを入力して中身をペーストする方法もあります。*
+3. 下部の **Commit changes** ボタンを押して保存します。
+
+## 4. GitHub Pagesの設定 (Settings)
+1. リポジトリの上部タブから **Settings** をクリックします。
+2. 左サイドバーにある **Pages** をクリックします。
+3. **Build and deployment** セクションの **Source** で `Deploy from a branch` を選択します。
+4. **Branch** で `main` (または `master`) を選択し、フォルダは `/(root)` を選択して **Save** を押します。
+
+## 5. 公開の確認 (Access)
+設定後、数分（1〜3分程度）待ってからブラウザをリロード（再読み込み）してください。
+
+**場所**: **Settings** > **Pages** の画面の一番上
+**表示**: 「Your site is live at...」というメッセージと共に、ボタンのようなリンクが表示されます。
+
+リンク例： `https://<ユーザー名>.github.io/<リポジトリ名>/`
+
+このボタンをクリックすると、作成したゲームのページが開きます！
+
+## ⚠️ 注意点
+- **反映の遅延**: アップロードや設定変更から反映まで数分かかることがあります。
+- **キャッシュ**: 更新しても変わらない場合、ブラウザのキャッシュをクリアしてください。
+- **セキュリティ**: 前の手順で設定した通り、GitHub Pagesは自動的に **HTTPS** で配信されるため安全です。

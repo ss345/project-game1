@@ -1,0 +1,14 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Body/Armor -->
+  <circle cx="50" cy="50" r="45" fill="#a00" stroke="#fff" stroke-width="2"/>
+  <path d="M20 50 Q50 80 80 50" fill="none" stroke="#000" stroke-width="3"/>
+  
+  <!-- Helmet -->
+  <path d="M20 40 Q50 10 80 40 L80 60 Q50 80 20 60 Z" fill="#ccc" stroke="#333" stroke-width="2"/>
+  <!-- Horns -->
+  <path d="M20 45 L10 20 L30 35" fill="#eed" stroke="#333" stroke-width="1"/>
+  <path d="M80 45 L90 20 L70 35" fill="#eed" stroke="#333" stroke-width="1"/>
+  <!-- Visor -->
+  <rect x="35" y="45" width="30" height="5" fill="#000"/>
+  <rect x="48" y="45" width="4" height="15" fill="#000"/>
+</svg>

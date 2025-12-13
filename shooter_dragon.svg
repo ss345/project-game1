@@ -1,0 +1,20 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Head Base -->
+  <circle cx="50" cy="50" r="45" fill="#060" stroke="#fff" stroke-width="2"/>
+  
+  <!-- Snout -->
+  <path d="M30 40 Q50 30 70 40 L75 70 Q50 90 25 70 Z" fill="#090"/>
+  
+  <!-- Eyes -->
+  <path d="M30 35 L45 35 L40 50 Z" fill="#ff0"/>
+  <path d="M70 35 L55 35 L60 50 Z" fill="#ff0"/>
+  <rect x="38" y="40" width="2" height="8" fill="#000"/>
+  <rect x="60" y="40" width="2" height="8" fill="#000"/>
+  
+  <!-- Nostrils -->
+  <circle cx="40" cy="65" r="3" fill="#000"/>
+  <circle cx="60" cy="65" r="3" fill="#000"/>
+  <!-- Puffs of smoke (optional) -->
+  <circle cx="35" cy="75" r="5" fill="#fff" opacity="0.5"/>
+  <circle cx="65" cy="75" r="4" fill="#fff" opacity="0.5"/>
+</svg>

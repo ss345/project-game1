@@ -1,0 +1,26 @@
+# Security Guide for Deployment
+
+## 1. HTTPS Requirement
+To ensure high security, this application **MUST** be served over HTTPS.
+HTTPS encrypts the communication between the user's browser and the server, preventing eavesdropping and tampering.
+
+- **Hosting Providers**: Most modern static site hosts (GitHub Pages, Vercel, Netlify, Firebase Hosting) provide HTTPS automatically.
+- **Self-Hosting**: If hosting on your own server (Nginx, Apache), use [Let's Encrypt](https://letsencrypt.org/) to obtain a free SSL certificate.
+
+## 2. Content Security Policy (CSP)
+We have implemented a strict CSP in `index.html`:
+```html
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;">
+```
+- **script-src 'self'**: Prevents loading scripts from unauthorized external servers (mitigates XSS).
+- **style-src 'unsafe-inline'**: Allowed for dynamic JavaScript styling adjustments (e.g., animations). 
+
+## 3. Game Integrity (Anti-Cheat Limitations)
+**Important**: This is a pure Client-Side application.
+- All game logic (Hit detection, Medal count, Boss HP) runs in the user's browser.
+- A technical user **CAN** modify these values using browser Developer Tools.
+- **Mitigation**: To prevent cheating effectively, the game logic must be moved to a secure server (Server-Authoritative Architecture). This requires a backend database and API, which is outside the scope of this static web app.
+
+## 4. Best Practices
+- Keep your server or hosting platform up to date.
+- Do not add unknown third-party scripts (analytics, ads) without auditing them and updating the CSP.
