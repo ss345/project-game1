@@ -153,12 +153,21 @@ export class Game {
             this.shooterImages['まほうつかい'].src = 'assets/shooter_mage.svg';
             this.shooterImages['ドラゴン'].src = 'assets/shooter_dragon.svg';
 
+            // Stages (Konan City)
+            this.stageInfo = [
+                { name: "のいち動物公園", bg: "assets/bg1.png" },
+                { name: "創造広場アクトランド", bg: "assets/bg2.png" },
+                { name: "ヤ・シィパーク", bg: "assets/bg3.png" },
+                { name: "絵金蔵", bg: "assets/bg4.png" },
+                { name: "手結港可動橋", bg: "assets/bg5.png" }
+            ];
+
             // Initial BG
             // Use stageInfo from constructor which is now corrected
             this.bgImage.src = this.stageInfo[0].bg;
 
             // Opening Sequence
-            this.showStory("日本を救え！", "モンスター軍団が現れた！");
+            this.showStory("香南市を救え！", "モンスター軍団が現れた！");
 
             // Delayed Stage Announcement
             setTimeout(() => {
