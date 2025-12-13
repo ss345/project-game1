@@ -15,7 +15,7 @@ export class Entity {
 }
 
 export class Bullet extends Entity {
-    constructor(x, y, angle, type, color) {
+    constructor(x, y, angle, type, color, damage) {
         super(x, y, 15); // Larger hitbox for visuals
         this.speed = 12;
         this.vx = Math.cos(angle) * this.speed;
@@ -23,6 +23,7 @@ export class Bullet extends Entity {
         this.type = type || 'NORMAL';
         this.color = color || '#ffd700';
         this.angle = angle;
+        this.damage = damage || 1;
     }
 
     update(dt) {
@@ -126,9 +127,9 @@ export class Target extends Entity {
         this.deathTimer = 0;
     }
 
-    hit() {
+    hit(damage) {
         if (this.isDying) return; // Invincible while dying
-        this.hp--;
+        this.hp -= (damage || 1);
         if (this.hp <= 0) {
             if (this.isBoss) {
                 // Trigger Death Animation

@@ -165,7 +165,7 @@ h1 {
     background: rgba(0, 0, 0, 0.5);
     border: 2px solid #fff;
     border-radius: 15px;
-    overflow: hidden;
+    /* overflow: hidden; REMOVED to show PUSH label */
     pointer-events: auto;
     /* Enable click */
     cursor: pointer;
@@ -182,6 +182,8 @@ h1 {
     background: linear-gradient(90deg, #f00, #ff0);
     transition: width 0.2s;
     box-shadow: 0 0 10px #ff0;
+    border-radius: 13px;
+    /* Added to match container inner radius */
 }
 
 #ex-label {
@@ -193,6 +195,53 @@ h1 {
     font-weight: bold;
     text-shadow: 1px 1px 0 #000;
     z-index: 2;
+}
+
+#ex-push-label {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #ff0;
+    text-shadow: 0 0 5px #f00, 0 0 10px #f00;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    z-index: 5;
+}
+
+#ex-gauge-container.ex-full {
+    animation: border-flash 0.5s infinite alternate;
+}
+
+#ex-gauge-container.ex-full #ex-push-label {
+    opacity: 1;
+    animation: text-flash 0.3s infinite alternate;
+}
+
+@keyframes border-flash {
+    from {
+        border-color: #ff0;
+        box-shadow: 0 0 10px #f00;
+    }
+
+    to {
+        border-color: #fff;
+        box-shadow: 0 0 20px #ff0;
+    }
+}
+
+@keyframes text-flash {
+    from {
+        transform: translateX(-50%) scale(1.0);
+    }
+
+    to {
+        transform: translateX(-50%) scale(1.2);
+    }
 }
 
 /* Deck Select */
@@ -258,7 +307,8 @@ h1 {
     align-items: center;
     z-index: 20;
     transition: opacity 0.5s ease;
-    pointer-events: none; /* Text shouldn't block, but JS blocking is global */
+    pointer-events: none;
+    /* Text shouldn't block, but JS blocking is global */
 }
 
 #story-overlay.hidden {

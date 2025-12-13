@@ -29,18 +29,20 @@ export class EXSystem {
 
         // Visual feedback when full
         const container = document.getElementById('ex-gauge-container');
-        if (this.value >= this.max) {
-            container.style.borderColor = '#ff0';
-            container.style.boxShadow = '0 0 15px #f00';
-        } else {
-            container.style.borderColor = '#fff';
-            container.style.boxShadow = 'none';
+        if (container) {
+            if (this.value >= this.max) {
+                container.classList.add('ex-full');
+            } else {
+                container.classList.remove('ex-full');
+            }
         }
     }
 
     reset() {
         this.value = 0;
         this.updateDisplay();
+        const container = document.getElementById('ex-gauge-container');
+        if (container) container.classList.remove('ex-full');
     }
 
     updateDisplay() {

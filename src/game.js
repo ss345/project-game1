@@ -1,5 +1,6 @@
 import { Bullet, BossTrigger, RealBoss, Target, Particle } from './entities.js';
 import { MedalSystem, EXSystem } from './mechanics.js';
+import { AudioManager } from './audio.js';
 
 export class Game {
     constructor(canvas) {
@@ -12,15 +13,17 @@ export class Game {
         this.state = 'TITLE';
         this.lastTime = 0;
 
+        // Mechanics
+        this.medalSystem = new MedalSystem();
+        this.exSystem = new EXSystem();
+        this.audio = new AudioManager();
+
         // Entities
         this.bullets = [];
         this.targets = [];
         this.particles = [];
         this.boss = null; // Can be Trigger or RealBoss
 
-        // Mechanics
-        this.medalSystem = new MedalSystem();
-        this.exSystem = new EXSystem();
 
         // Input
         this.inputDown = false;
@@ -119,6 +122,12 @@ export class Game {
 
     startBattle(monsters) {
         console.log('startBattle called with:', monsters);
+
+        // Ensure Audio is Ready (User Gesture)
+        if (this.audio.ctx.state === 'suspended') {
+            this.audio.ctx.resume();
+        }
+
         try {
             this.state = 'BATTLE';
             this.subState = 'NORMAL'; // NORMAL or BOSS_PHASE
@@ -157,18 +166,21 @@ export class Game {
 
             // Stages (Konan City)
             this.stageInfo = [
-                { name: "のいち動物公園", bg: "assets/bg1.png" }, // Normal / Stage 1
+                { name: "のいち動物公園（三宝山）", bg: "assets/bg_castle.png" }, // Normal / Stage 1 - Sanpozan Castle
                 { name: "創造広場アクトランド", bg: "assets/bg2.png" },
                 { name: "ヤ・シィパーク", bg: "assets/bg3.png" },
                 { name: "絵金蔵", bg: "assets/bg4.png" },
                 { name: "手結港可動橋", bg: "assets/bg5.png" }
             ];
 
-            this.normalBg = "assets/bg1.png"; // Default Normal BG
+            this.normalBg = "assets/bg_castle.png"; // New Castle BG
             this.bgImage.src = this.normalBg;
 
             // Opening Sequence
             this.showStory("香南市を救え！", "モンスター軍団が現れた！");
+
+            // Start BGM
+            this.audio.playBGM(1); // Default to Stage 1 track
 
             // Spawn some initial mobs
             for (let i = 0; i < 5; i++) {
@@ -186,22 +198,31 @@ export class Game {
         if (!btn) {
             btn = document.createElement('button');
             btn.id = 'hud-return-btn';
-            btn.textContent = 'プレイストップ'; // Changed text as requested "Play Stop Button"
+            btn.textContent = '✕'; // Icon-like text (or use an SVG/Image if preferred, X is simple for Stop)
+            btn.title = 'プレイストップ';
             btn.style.position = 'absolute';
-            btn.style.top = '10px';
-            btn.style.left = '10px';
-            btn.style.padding = '8px 16px';
-            btn.style.background = 'rgba(255, 0, 0, 0.8)'; // Red to be distinct
+            btn.style.bottom = '20px'; // Bottom
+            btn.style.left = '20px';   // Left
+            btn.style.top = 'auto';    // Reset Top
+            btn.style.width = '50px';
+            btn.style.height = '50px';
+            btn.style.padding = '0';
+            btn.style.background = 'rgba(255, 60, 60, 0.9)';
             btn.style.color = '#fff';
-            btn.style.border = '2px solid #fff';
-            btn.style.borderRadius = '8px';
+            btn.style.border = '3px solid #fff';
+            btn.style.borderRadius = '50%'; // Round
+            btn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4)';
             btn.style.cursor = 'pointer';
-            btn.style.zIndex = '99999'; // Very High z-index
-            btn.style.fontFamily = 'monospace';
-            btn.style.fontSize = '16px';
-            btn.style.pointerEvents = 'auto'; // Ensure clickable
+            btn.style.zIndex = '99999';
+            btn.style.fontFamily = 'Arial, sans-serif';
+            btn.style.fontSize = '24px';
+            btn.style.fontWeight = 'bold';
+            btn.style.display = 'flex';
+            btn.style.justifyContent = 'center';
+            btn.style.alignItems = 'center';
+            btn.style.pointerEvents = 'auto';
             btn.onclick = (e) => {
-                e.stopPropagation(); // Stop click from firing shooting
+                e.stopPropagation();
                 if (confirm('タイトル画面に戻りますか？')) {
                     location.reload();
                 }
@@ -238,9 +259,11 @@ export class Game {
         if (leaderName === 'まほうつかい') {
             // Mage EX: 20s Damage Buff (1 hit)
             this.mageDamageBuffTime = 20; // seconds
+            this.currentBuffMaxTime = 20;
         } else if (leaderName === 'ドラゴン') {
             // Dragon EX: 30s Medal Buff (5x)
             this.dragonMedalBuffTime = 30; // seconds
+            this.currentBuffMaxTime = 30;
         } else {
             // Warrior (Default): Clear Screen
             this.targets.forEach(t => {
@@ -284,6 +307,7 @@ export class Game {
 
         this.medalSystem.modify(-cost);
         this.medalsSpentInStage += cost;
+        this.audio.playShoot();
 
         const startX = this.width / 2;
         const startY = this.height - 50;
@@ -303,7 +327,8 @@ export class Game {
 
             const spread = Math.PI / 6; // 30 degrees spread
             const angles = [baseAngle, baseAngle - spread, baseAngle + spread];
-            const dmg = this.mageDamageBuffTime > 0 ? 1 : 0.25;
+            // User requested 12x multiplier. Base is 0.25. 0.25 * 12 = 3.
+            const dmg = this.mageDamageBuffTime > 0 ? 3 : 0.25;
 
             angles.forEach(a => {
                 this.bullets.push(new Bullet(startX, startY, a, leader.name, leader.color, dmg));
@@ -336,8 +361,12 @@ export class Game {
             this.bgImage.src = this.stageInfo[visualIndex].bg;
         }
 
+        // Play Stage BGM
+        this.audio.playBGM(visualIndex + 1);
+
         const x = this.width / 2;
         const y = 100;
+
 
         // Config for Boss (HP 50, Reward 250)
         // Pass visualIndex for Boss Look
@@ -349,6 +378,9 @@ export class Game {
         this.subState = 'NORMAL';
         this.bossTimer = 0;
         this.bgImage.src = this.normalBg; // Reset BG
+
+        // Reset BGM to Stage 1
+        this.audio.playBGM(1);
 
         // Remove existing Boss (if any)
         this.targets = this.targets.filter(t => t.type !== 'BOSS');
@@ -415,8 +447,26 @@ export class Game {
         }
 
         // Buff Timers
-        if (this.mageDamageBuffTime > 0) this.mageDamageBuffTime -= dt / 1000;
-        if (this.dragonMedalBuffTime > 0) this.dragonMedalBuffTime -= dt / 1000;
+        if (this.mageDamageBuffTime > 0) {
+            this.mageDamageBuffTime -= dt / 1000;
+            // Update EX Gauge as Timer
+            const ratio = Math.max(0, this.mageDamageBuffTime / this.currentBuffMaxTime);
+            document.getElementById('ex-gauge-bar').style.width = `${ratio * 100}%`;
+            if (this.mageDamageBuffTime <= 0) {
+                this.mageDamageBuffTime = 0;
+                this.exSystem.reset(); // Reset to empty when done
+            }
+        }
+        if (this.dragonMedalBuffTime > 0) {
+            this.dragonMedalBuffTime -= dt / 1000;
+            // Update EX Gauge as Timer
+            const ratio = Math.max(0, this.dragonMedalBuffTime / this.currentBuffMaxTime);
+            document.getElementById('ex-gauge-bar').style.width = `${ratio * 100}%`;
+            if (this.dragonMedalBuffTime <= 0) {
+                this.dragonMedalBuffTime = 0;
+                this.exSystem.reset();
+            }
+        }
 
         // Boss Timer
         if (this.subState === 'BOSS_PHASE') {
@@ -472,7 +522,27 @@ export class Game {
         this.checkCollisions();
 
         // Game Over Check
-        if (this.state === 'BATTLE' && this.medalSystem.count <= 0 && this.bullets.length === 0 && !this.cutInActive) {
+        const leader = this.team && this.team[0];
+        let gameOverThreshold = 0;
+        // Dragon Game Over if Medals <= 3 (Cost is 3)
+        // User requested: "3以下" (<= 3). This effectively means if you have 3 medals, you can shoot once more, 
+        // but the rule says "Become Game Over if <= 3". This would mean you can't use the last 3 medals?
+        // Let's stick to strict interpretation: if (medals <= 3) -> Game Over.
+        // Wait, if I have 3 medals, I can shoot. Shooting costs 3. Count becomes 0.
+        // If I have 3 medals, should I be able to shoot?
+        // If the rule is "Game Over if <= 3", then having 3 means Game Over immediately?
+        // Or does it mean "If cannot shoot"?
+        // Usually such rules mean "If you cannot afford to shoot". Dragon costs 3.
+        // So strict "Cannot shoot" would be < 3.
+        // But user said "3以下" (<= 3).
+        // If I make it strict "count <= 3", then having 3 medals results in Game Over.
+        // I will implement "count <= 3" for Dragon as requested.
+
+        if (leader && leader.name === 'ドラゴン') {
+            gameOverThreshold = 3;
+        }
+
+        if (this.state === 'BATTLE' && this.medalSystem.count <= gameOverThreshold && this.bullets.length === 0 && !this.cutInActive) {
             this.state = 'GAMEOVER';
             document.getElementById('ui-layer').style.pointerEvents = 'auto';
             document.getElementById('hud').classList.add('hidden');
@@ -520,7 +590,21 @@ export class Game {
             for (const t of this.targets) {
                 if (b.intersects(t)) {
                     b.active = false;
-                    t.hit(b.damage || 1); // Use bullet damage
+
+                    // Difficulty Scaling: 
+                    // Medals >= 1000: Non-Boss targets have 2.0x Defense
+                    // Medals >= 500: Non-Boss targets have 1.5x Defense
+                    let dmg = b.damage || 1;
+                    if (!t.isBoss) {
+                        if (this.medalSystem.count >= 1000) {
+                            dmg = dmg / 2.0;
+                        } else if (this.medalSystem.count >= 500) {
+                            dmg = dmg / 1.5;
+                        }
+                    }
+
+                    t.hit(dmg); // Use calculated damage
+                    this.audio.playHit(); // Hit SFX
                     this.createExplosion(b.x, b.y, '#fff', 5);
 
                     if (!t.active) {
@@ -529,7 +613,9 @@ export class Game {
                         if (this.dragonMedalBuffTime > 0) value *= 5; // Dragon Buff
 
                         this.medalSystem.modify(value);
-                        this.exSystem.add(5);
+                        if (this.mageDamageBuffTime <= 0 && this.dragonMedalBuffTime <= 0) {
+                            this.exSystem.add(5);
+                        }
                         this.createExplosion(t.x, t.y, t.type === 'RARE' ? '#ff3366' : '#00ffcc', 15);
                     } else if (t.isDying) {
                         // Boss is entering dying state, just awarded medals?
@@ -550,8 +636,11 @@ export class Game {
             if (b.active && this.boss && b.intersects(this.boss)) {
                 b.active = false;
                 this.boss.hit(b.damage || 1);
+                this.audio.playHit(); // Hit SFX
                 this.createExplosion(b.x, b.y, '#ffaa00', 5);
-                this.exSystem.add(1);
+                if (this.mageDamageBuffTime <= 0 && this.dragonMedalBuffTime <= 0) {
+                    this.exSystem.add(1);
+                }
             }
         }
     }
@@ -616,11 +705,33 @@ export class Game {
 
         if (leaderInfo.name === 'ドラゴン') {
             this.ctx.lineTo(aimStartX, 0); // Straight up from player pos
+            this.ctx.stroke();
+        } else if (leaderInfo.name === 'まほうつかい') {
+            // Mage: 3 Way Aim Lines
+            const startX = aimStartX;
+            const startY = this.height - 50;
+
+            // Base Angle to Cursor
+            const dx = this.inputPos.x - startX;
+            const dy = this.inputPos.y - startY;
+            const baseAngle = Math.atan2(dy, dx);
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const lineLen = Math.max(dist, 500); // Draw nice long lines
+
+            const spread = Math.PI / 6; // 30 degrees
+            const angles = [baseAngle, baseAngle - spread, baseAngle + spread];
+
+            angles.forEach(a => {
+                this.ctx.beginPath();
+                this.ctx.moveTo(startX, startY);
+                this.ctx.lineTo(startX + Math.cos(a) * lineLen, startY + Math.sin(a) * lineLen);
+                this.ctx.stroke();
+            });
         } else {
             this.ctx.lineTo(this.inputPos.x, this.inputPos.y);
+            this.ctx.stroke();
         }
 
-        this.ctx.stroke();
         this.ctx.restore();
 
         // Draw Shooter Character (Leader)

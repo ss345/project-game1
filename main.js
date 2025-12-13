@@ -32,34 +32,42 @@ window.addEventListener('load', () => {
         const list = document.getElementById('monster-list');
         list.innerHTML = '';
         const monsters = [
-            { id: 1, name: 'せんし', color: '#f00' },
-            { id: 2, name: 'まほうつかい', color: '#00f' },
-            { id: 3, name: 'ドラゴン', color: '#0f0' }
+            { id: 1, name: 'せんし', color: '#f00', stats: '攻撃:高い 速度:普通' },
+            { id: 2, name: 'まほうつかい', color: '#00f', stats: '攻撃:低い 範囲:広い' },
+            { id: 3, name: 'ドラゴン', color: '#0f0', stats: '攻撃:最強 コスト:3枚' }
         ];
 
         monsters.forEach(m => {
             const card = document.createElement('div');
             card.className = 'monster-card';
-            card.textContent = m.name;
+            card.innerHTML = `<strong>${m.name}</strong><br><span style="font-size:0.8em">${m.stats}</span>`;
             card.style.backgroundColor = m.color;
+            card.style.display = 'flex';
+            card.style.flexDirection = 'column';
+            card.style.justifyContent = 'center';
+            card.style.alignItems = 'center';
+            card.style.textAlign = 'center';
             card.onclick = () => {
-                if (selectedMonsters.includes(m)) {
-                    selectedMonsters = selectedMonsters.filter(xm => xm !== m);
-                    card.classList.remove('selected');
-                } else {
-                    if (selectedMonsters.length < 3) {
-                        selectedMonsters.push(m);
-                        card.classList.add('selected');
-                    }
-                }
+                // Single Selection Mode
+                // 1. Deselect All Visuals
+                const allCards = document.querySelectorAll('.monster-card');
+                allCards.forEach(c => c.classList.remove('selected'));
+
+                // 2. Select This Visual
+                card.classList.add('selected');
+
+                // 3. Update Data (Single Item Array)
+                selectedMonsters = [m];
+
                 console.log('Selection Update:', selectedMonsters);
-                battleStartBtn.disabled = selectedMonsters.length === 0;
-                console.log('Button Disabled:', battleStartBtn.disabled);
+                battleStartBtn.disabled = false;
             };
             list.appendChild(card);
         });
 
-        // Reset selection on open
+        // Auto-select first one or leave empty?
+        // Let's leave empty to force choice, or select first?
+        // User asked for "select logic", so probably starts empty.
         selectedMonsters = [];
         battleStartBtn.disabled = true;
     }
@@ -124,6 +132,21 @@ window.addEventListener('load', () => {
         // Pass team data
         game.startBattle(selectedMonsters);
     });
+
+    const soundToggleBtn = document.getElementById('sound-toggle-btn');
+    if (soundToggleBtn) {
+        soundToggleBtn.addEventListener('click', () => {
+            if (game.audio.isMuted) {
+                game.audio.setMute(false);
+                soundToggleBtn.textContent = 'SOUND: OFFにする'; // Now playing, so action is OFF
+                soundToggleBtn.style.background = '#666'; // Reset color
+            } else {
+                game.audio.setMute(true);
+                soundToggleBtn.textContent = 'SOUND: ONにする'; // Now muted, so action is ON
+                soundToggleBtn.style.background = '#333'; // Darker
+            }
+        });
+    }
 
     // Handle Resize
     window.addEventListener('resize', () => {

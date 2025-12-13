@@ -32,18 +32,10 @@ Current state is a client-side static application.
     - **Reset**: When returning to Normal Stage (after Defeat or Timeout), respawn Boss Trigger (HP 100).
     - **Cycle**: This loop repeats indefinitely. Boss Trigger -> Select Stage Boss -> Boss Battle -> Normal Stage -> Boss Trigger.
 
-### UI & Assets
-#### [MODIFY] [src/game.js](file:///Users/SSS/.gemini/game/src/game.js)
-- **Play Stop Button**:
-    - Move to **Bottom-Left**.
-    - Style as **Round Icon** (likely 'X' or 'Stop' symbol).
-- **Background**:
-    - Change Normal Stage BG (Stage 1 or specific Normal BG?) to "Sanpouzan Castle" in Konan City Noichi-cho. 
-    - *Action*: Generate/Search for "Sanpouzan Castle" image or use placeholder if generation restricted? I will use `generate_image` for "Sanpouzan Castle (Shingyoji) in Konan City".
-
 ### Verification Plan
-- Check Button position (bottom-left) and shape (round).
-- Check BG image is updated.
+- Verify Background changes in sync with Trigger shape/color change.
+- Verify "Return to Title" button works.
+- Verify Mage aiming works.
 
 ## Proposed Changes
 
