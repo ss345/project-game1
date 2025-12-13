@@ -1,4 +1,4 @@
-import { Bullet, Boss, Target, Particle } from './entities.js';
+import { Bullet, BossTrigger, RealBoss, Target, Particle } from './entities.js';
 import { MedalSystem, EXSystem } from './mechanics.js';
 
 export class Game {
@@ -16,7 +16,7 @@ export class Game {
         this.bullets = [];
         this.targets = [];
         this.particles = [];
-        this.boss = null;
+        this.boss = null; // Can be Trigger or RealBoss
 
         // Mechanics
         this.medalSystem = new MedalSystem();
@@ -30,18 +30,17 @@ export class Game {
 
         this.paused = false;
 
-        // Stage System
-        this.stage = 1;
-        this.medalsSpentInStage = 0;
-        this.stageClearTargetActive = false;
+        // Stage System (Dynamic)
+        this.bossTimer = 0;
+        this.isBossPhase = false;
 
-        // Stages (Japan Tour)
+        // Use v0.1.0 Stage Data as Base
         this.stageInfo = [
-            { name: "北海道：札幌時計台", bg: "assets/bg1.png" },
-            { name: "東京：東京タワー", bg: "assets/bg2.png" },
-            { name: "京都：金閣寺", bg: "assets/bg3.png" },
-            { name: "大阪：大阪城", bg: "assets/bg4.png" },
-            { name: "沖縄：エメラルドビーチ", bg: "assets/bg5.png" }
+            { name: "のいち動物公園", bg: "assets/bg1.png" },
+            { name: "創造広場アクトランド", bg: "assets/bg2.png" },
+            { name: "ヤ・シィパーク", bg: "assets/bg3.png" },
+            { name: "絵金蔵", bg: "assets/bg4.png" },
+            { name: "手結港可動橋", bg: "assets/bg5.png" }
         ];
 
         // Visuals
@@ -51,8 +50,6 @@ export class Game {
         this.storyActive = false;
 
         this.bgImage = new Image();
-        // this.bgImage.src will be set in startBattle or dynamic loader
-
         this.mobImage = new Image();
         this.mobImage.src = 'assets/mob_slime.png';
 
@@ -124,11 +121,16 @@ export class Game {
         console.log('startBattle called with:', monsters);
         try {
             this.state = 'BATTLE';
-            this.boss = new Boss(this.width / 2, 100);
+            this.subState = 'NORMAL'; // NORMAL or BOSS_PHASE
+            this.bossTimer = 0;
+            this.boss = new BossTrigger(this.width / 2, 100);
             this.bullets = [];
             this.targets = [];
             this.particles = [];
             this.exSystem.reset();
+
+            // UI: Show Title Button
+            this.showTitleButton();
 
             // Store Team
             this.team = monsters && monsters.length > 0 ? monsters : [{ name: 'せんし', color: '#ff0000' }];
@@ -153,18 +155,22 @@ export class Game {
             this.shooterImages['まほうつかい'].src = 'assets/shooter_mage.svg';
             this.shooterImages['ドラゴン'].src = 'assets/shooter_dragon.svg';
 
-            // Initial BG
-            // Use stageInfo from constructor which is now corrected
-            this.bgImage.src = this.stageInfo[0].bg;
+            // Stages (Konan City)
+            this.stageInfo = [
+                { name: "のいち動物公園", bg: "assets/bg1.png" }, // Normal / Stage 1
+                { name: "創造広場アクトランド", bg: "assets/bg2.png" },
+                { name: "ヤ・シィパーク", bg: "assets/bg3.png" },
+                { name: "絵金蔵", bg: "assets/bg4.png" },
+                { name: "手結港可動橋", bg: "assets/bg5.png" }
+            ];
+
+            this.normalBg = "assets/bg1.png"; // Default Normal BG
+            this.bgImage.src = this.normalBg;
 
             // Opening Sequence
-            this.showStory("日本を救え！", "モンスター軍団が現れた！");
+            this.showStory("香南市を救え！", "モンスター軍団が現れた！");
 
-            // Delayed Stage Announcement
-            setTimeout(() => {
-                this.showStory(`Stage 1`, this.stageInfo[0].name);
-            }, 3000);
-
+            // Spawn some initial mobs
             for (let i = 0; i < 5; i++) {
                 this.spawnTarget();
             }
@@ -174,6 +180,50 @@ export class Game {
         }
     }
 
+    showTitleButton() {
+        // Create or Show Button
+        let btn = document.getElementById('hud-return-btn');
+        if (!btn) {
+            btn = document.createElement('button');
+            btn.id = 'hud-return-btn';
+            btn.textContent = 'プレイストップ'; // Changed text as requested "Play Stop Button"
+            btn.style.position = 'absolute';
+            btn.style.top = '10px';
+            btn.style.left = '10px';
+            btn.style.padding = '8px 16px';
+            btn.style.background = 'rgba(255, 0, 0, 0.8)'; // Red to be distinct
+            btn.style.color = '#fff';
+            btn.style.border = '2px solid #fff';
+            btn.style.borderRadius = '8px';
+            btn.style.cursor = 'pointer';
+            btn.style.zIndex = '99999'; // Very High z-index
+            btn.style.fontFamily = 'monospace';
+            btn.style.fontSize = '16px';
+            btn.style.pointerEvents = 'auto'; // Ensure clickable
+            btn.onclick = (e) => {
+                e.stopPropagation(); // Stop click from firing shooting
+                if (confirm('タイトル画面に戻りますか？')) {
+                    location.reload();
+                }
+            };
+            // Append to UI Layer or HUD to ensure it sits with other UI
+            const uiLayer = document.getElementById('ui-layer');
+            if (uiLayer) {
+                uiLayer.appendChild(btn);
+            } else {
+                document.body.appendChild(btn);
+            }
+        }
+        btn.style.display = 'block';
+    }
+
+    hideTitleButton() {
+        const btn = document.getElementById('hud-return-btn');
+        if (btn) btn.style.display = 'none';
+    }
+
+
+
     triggerEX() {
         if (this.cutInActive) return;
 
@@ -181,7 +231,7 @@ export class Game {
         this.cutInActive = true;
         this.cutInTimer = 2.0; // 2 seconds animation
         // Use Leader Name
-        this.cutInText = `${this.team[0].name}のEXわざ！`;
+        this.cutInText = `${this.team[0].name} のEXわざ！`;
 
         const leaderName = this.team[0].name;
 
@@ -211,6 +261,7 @@ export class Game {
         this.boss = null;
         this.mageDamageBuffTime = 0;
         this.dragonMedalBuffTime = 0;
+        this.hideTitleButton();
     }
 
     tryShoot() {
@@ -221,8 +272,6 @@ export class Game {
             this.lastShotTime = now;
         }
     }
-
-
 
     shoot() {
         if (this.medalSystem.count <= 0) return;
@@ -236,30 +285,24 @@ export class Game {
         this.medalSystem.modify(-cost);
         this.medalsSpentInStage += cost;
 
-        // Trigger Stage Clear Target
-        if (!this.stageClearTargetActive && this.medalsSpentInStage >= 70) {
-            this.spawnStageTarget();
-        }
-
         const startX = this.width / 2;
         const startY = this.height - 50;
 
-        // Dragon Slide Logic calculation for Shooter Pos
-        // Note: Real shooter position logic needs to be consistent between draw and shoot.
-        // For Dragon, shooter X follows inputPos.x
+        // Shooter Position for Aiming Origin
         let shooterX = startX;
         if (leader.name === 'ドラゴン') {
             shooterX = Math.max(30, Math.min(this.width - 30, this.inputPos.x));
         }
 
         if (leader.name === 'まほうつかい') {
-            // Mage: 3 Way (90, 60, 120 deg) -> -90, -60, -120 in canvas (Up is -90)
-            // User said: Vertical, 60, 120. If Vertical is -90.
-            // 60 deg relative? Or absolute? 
-            // -90 is up. 60 deg from 0 is down-right?
-            // "Vertical and 60 and 120" usually means radial spread.
-            // Let's interpret as: Center(-90), Left(-120), Right(-60).
-            const angles = [-Math.PI / 2, -Math.PI / 3, -2 * Math.PI / 3];
+            // Mage: 3 Way Aimed
+            // Calculate angle to cursor
+            let baseAngle = -Math.PI / 2;
+            // Aim at cursor
+            baseAngle = Math.atan2(this.inputPos.y - startY, this.inputPos.x - startX);
+
+            const spread = Math.PI / 6; // 30 degrees spread
+            const angles = [baseAngle, baseAngle - spread, baseAngle + spread];
             const dmg = this.mageDamageBuffTime > 0 ? 1 : 0.25;
 
             angles.forEach(a => {
@@ -278,25 +321,46 @@ export class Game {
         }
     }
 
-    spawnStageTarget() {
-        this.stageClearTargetActive = true;
+    spawnStageTarget(visualIndex) {
+        // Change Substate
+        this.subState = 'BOSS_PHASE';
+        this.bossTimer = 30.0; // 30 seconds limit
 
-        // Flashy Effect (Reuse cut-in for now or new effect)
         this.cutInActive = true;
         this.cutInTimer = 2.0;
-        this.cutInText = `STAGE ${this.stage} BOSS!`;
+        this.cutInText = `BOSS APPEARED!`;
 
-        // Wait for cut-in to finish then spawn? Or spawn immediately behind?
-        // Let's spawn after cut-in logic or effectively during
+        // Change BG based on Visual Index
+        // Visual Index: 0=Stage1, 1=Stage2, 2=Stage3, 3=Stage4, 4=Stage5
+        if (this.stageInfo[visualIndex]) {
+            this.bgImage.src = this.stageInfo[visualIndex].bg;
+        }
 
         const x = this.width / 2;
         const y = 100;
 
-        // Stage Config
-        const config = this.getStageConfig(this.stage);
-        config.stageNum = this.stage; // Pass stage number for AI logic
-
+        // Config for Boss (HP 50, Reward 250)
+        // Pass visualIndex for Boss Look
+        const config = { hp: 50, reward: 250, stageNum: 3 }; // Enable moving logic
         this.targets.push(new Target(x, y, 'BOSS', this.mobImage, config));
+    }
+
+    returnToNormalStage() {
+        this.subState = 'NORMAL';
+        this.bossTimer = 0;
+        this.bgImage.src = this.normalBg; // Reset BG
+
+        // Remove existing Boss (if any)
+        this.targets = this.targets.filter(t => t.type !== 'BOSS');
+
+        // Respawn Trigger
+        if (!this.boss) {
+            this.boss = new BossTrigger(this.width / 2, 100);
+        }
+
+        this.cutInActive = true;
+        this.cutInTimer = 1.5;
+        this.cutInText = 'STAGE RESET';
     }
 
     getStageConfig(stage) {
@@ -346,7 +410,6 @@ export class Game {
             if (this.cutInTimer <= 0) {
                 this.cutInActive = false;
             }
-            // Update particles even during cut-in
             this.particles.forEach(p => p.update(dt));
             return;
         }
@@ -354,6 +417,16 @@ export class Game {
         // Buff Timers
         if (this.mageDamageBuffTime > 0) this.mageDamageBuffTime -= dt / 1000;
         if (this.dragonMedalBuffTime > 0) this.dragonMedalBuffTime -= dt / 1000;
+
+        // Boss Timer
+        if (this.subState === 'BOSS_PHASE') {
+            this.bossTimer -= dt / 1000;
+            // UPDATE TIMER UI? (Maybe draw it)
+            if (this.bossTimer <= 0) {
+                // Time Over
+                this.returnToNormalStage();
+            }
+        }
 
         this.bullets = this.bullets.filter(b => b.active);
         this.targets = this.targets.filter(t => t.active);
@@ -367,24 +440,32 @@ export class Game {
         this.targets.forEach(t => {
             if (t.isDying && t.deathTimer <= 0 && t.active) {
                 t.active = false;
-                // BIG EXPLOSION
                 this.createExplosion(t.x, t.y, '#fff', 50);
-                this.createExplosion(t.x, t.y, '#f00', 30);
-                this.createExplosion(t.x, t.y, '#ff0', 30);
 
-                // Actual Stage Clear Logic
-                this.handleStageClear();
+                if (t.type === 'BOSS') {
+                    // Boss Defeated
+                    let value = t.value || 250;
+                    if (this.dragonMedalBuffTime > 0) value *= 5;
+                    this.medalSystem.modify(value);
+
+                    // Return to Normal
+                    setTimeout(() => this.returnToNormalStage(), 500);
+                }
             }
         });
 
         if (this.boss) {
             this.boss.update(dt);
             if (this.boss.hp <= 0) {
-                // Boss Defeated (Now Bonus)
+                // Boss Trigger Defeated
                 this.medalSystem.modify(50);
                 this.createExplosion(this.boss.x, this.boss.y, '#ff0000', 30);
-                this.boss = null; // Remove boss
-                // Do NOT end game
+
+                const visualIdx = this.boss.visualIndex; // Capture visual
+                this.boss = null; // Remove trigger
+
+                // Spawn Boss Phase
+                this.spawnStageTarget(visualIdx);
             }
         }
 
@@ -392,15 +473,14 @@ export class Game {
 
         // Game Over Check
         if (this.state === 'BATTLE' && this.medalSystem.count <= 0 && this.bullets.length === 0 && !this.cutInActive) {
-            // Wait a bit to ensure no bullets are flying? 
-            // Simplified: Game Over
             this.state = 'GAMEOVER';
             document.getElementById('ui-layer').style.pointerEvents = 'auto';
             document.getElementById('hud').classList.add('hidden');
             document.getElementById('game-over-screen').classList.remove('hidden');
+            this.hideTitleButton();
         }
 
-        if (Math.random() < 0.02 && this.targets.length < 10) {
+        if (Math.random() < 0.02 && this.targets.length < 10 && this.subState === 'NORMAL') {
             this.spawnTarget();
         }
     }
@@ -427,9 +507,9 @@ export class Game {
             if (this.stageInfo[nextStageIdx]) {
                 this.bgImage.src = this.stageInfo[nextStageIdx].bg;
                 setTimeout(() => {
-                    this.showStory(`Stage ${this.stage}`, this.stageInfo[nextStageIdx].name);
+                    this.showStory(`Stage ${this.stage} `, this.stageInfo[nextStageIdx].name);
                     // Respawn Bonus Boss for new stage
-                    if (!this.boss) this.boss = new Boss(this.width / 2, 100);
+                    if (!this.boss) this.boss = new BossTrigger(this.width / 2, 100);
                 }, 2000);
             }
         }
@@ -469,7 +549,7 @@ export class Game {
             }
             if (b.active && this.boss && b.intersects(this.boss)) {
                 b.active = false;
-                this.boss.hit(b.damage);
+                this.boss.hit(b.damage || 1);
                 this.createExplosion(b.x, b.y, '#ffaa00', 5);
                 this.exSystem.add(1);
             }
@@ -590,6 +670,20 @@ export class Game {
             this.ctx.font = 'bold 48px Arial';
             this.ctx.textAlign = 'center';
             this.ctx.fillText(this.cutInText, 0, 0);
+            this.ctx.restore();
+        }
+
+        // Draw Boss Timer if Active
+        if (this.subState === 'BOSS_PHASE' && !this.cutInActive) {
+            this.ctx.save();
+            this.ctx.font = 'bold 30px Arial';
+            this.ctx.fillStyle = '#fff';
+            this.ctx.textAlign = 'center';
+            this.ctx.strokeStyle = '#000';
+            this.ctx.lineWidth = 3;
+            // Draw at top center
+            this.ctx.strokeText(`TIME: ${Math.ceil(this.bossTimer)}`, this.width / 2, 50);
+            this.ctx.fillText(`TIME: ${Math.ceil(this.bossTimer)}`, this.width / 2, 50);
             this.ctx.restore();
         }
     }
