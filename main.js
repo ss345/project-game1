@@ -31,43 +31,56 @@ window.addEventListener('load', () => {
     function renderMonsterList() {
         const list = document.getElementById('monster-list');
         list.innerHTML = '';
+
+        // Stats: 1-3 stars. Buff: Text.
         const monsters = [
-            { id: 1, name: 'せんし', color: '#f00', stats: '攻撃:高い 速度:普通' },
-            { id: 2, name: 'まほうつかい', color: '#00f', stats: '攻撃:低い 範囲:広い' },
-            { id: 3, name: 'ドラゴン', color: '#0f0', stats: '攻撃:最強 コスト:3枚' }
+            { id: 1, name: 'せんし', color: '#f00', atk: 2, bullets: 1, cost: 1, buff: '画面内にいるモンスター（トリガーモンスター以外）を倒してコインを獲得' },
+            { id: 2, name: 'まほうつかい', color: '#00f', atk: 1, bullets: 3, cost: 1, buff: '20秒間 攻撃力12倍' },
+            { id: 3, name: 'ドラゴン', color: '#0f0', atk: 3, bullets: 1, cost: 3, buff: '30秒間 メダル獲得5倍' }
         ];
+
+        const toStars = (val) => {
+            let s = '';
+            for (let i = 0; i < 3; i++) {
+                s += (i < val) ? '★' : '☆';
+            }
+            return s;
+        };
 
         monsters.forEach(m => {
             const card = document.createElement('div');
             card.className = 'monster-card';
-            card.innerHTML = `<strong>${m.name}</strong><br><span style="font-size:0.8em">${m.stats}</span>`;
+            // Custom Layout for stats
+            card.innerHTML = `
+                <div style="font-weight:bold; font-size:1.1em; margin-bottom:5px;">${m.name}</div>
+                <div style="font-size:0.8em; text-align:left; width:90%;">
+                    <div>攻撃力: <span style="color:#ff0">${toStars(m.atk)}</span></div>
+                    <div>発射数: <span style="color:#ff0">${toStars(m.bullets)}</span></div>
+                    <div>コスト: <span style="color:#ff0">${toStars(m.cost)}</span></div>
+                    <div style="margin-top:4px; font-size:0.9em; border-top:1px solid #666; padding-top:2px;">BUFF: ${m.buff}</div>
+                </div>
+            `;
             card.style.backgroundColor = m.color;
             card.style.display = 'flex';
             card.style.flexDirection = 'column';
             card.style.justifyContent = 'center';
             card.style.alignItems = 'center';
             card.style.textAlign = 'center';
+            card.style.width = '140px'; // Wider for text
+            card.style.height = '180px'; // Taller for stats
+
             card.onclick = () => {
                 // Single Selection Mode
-                // 1. Deselect All Visuals
                 const allCards = document.querySelectorAll('.monster-card');
                 allCards.forEach(c => c.classList.remove('selected'));
-
-                // 2. Select This Visual
                 card.classList.add('selected');
-
-                // 3. Update Data (Single Item Array)
                 selectedMonsters = [m];
-
                 console.log('Selection Update:', selectedMonsters);
                 battleStartBtn.disabled = false;
             };
             list.appendChild(card);
         });
 
-        // Auto-select first one or leave empty?
-        // Let's leave empty to force choice, or select first?
-        // User asked for "select logic", so probably starts empty.
         selectedMonsters = [];
         battleStartBtn.disabled = true;
     }
