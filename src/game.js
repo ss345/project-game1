@@ -166,14 +166,21 @@ export class Game {
 
             // Stages (Konan City)
             this.stageInfo = [
-                { name: "のいち動物公園（三宝山）", bg: "assets/bg_castle.png" }, // Normal / Stage 1 - Sanpozan Castle
-                { name: "創造広場アクトランド", bg: "assets/bg2.png" },
-                { name: "ヤ・シィパーク", bg: "assets/bg3.png" },
-                { name: "絵金蔵", bg: "assets/bg4.png" },
-                { name: "手結港可動橋", bg: "assets/bg5.png" }
+                { name: "のいち動物公園（三宝山）", bg: "assets/bg_sanposan.png", bossImg: "assets/boss1.png" },
+                { name: "創造広場アクトランド", bg: "assets/bg2.png", bossImg: "assets/boss2.png" },
+                { name: "ヤ・シィパーク", bg: "assets/bg3.png", bossImg: "assets/boss3.png" },
+                { name: "絵金蔵", bg: "assets/bg4.png", bossImg: "assets/boss4.png" },
+                { name: "手結港可動橋", bg: "assets/bg5.png", bossImg: "assets/boss5.png" }
             ];
 
-            this.normalBg = "assets/bg_castle.png"; // New Castle BG
+            // Load Boss Images
+            this.bossImages = [];
+            this.stageInfo.forEach((info, index) => {
+                const img = new Image();
+                img.src = info.bossImg;
+                this.bossImages[index] = img;
+            });
+            this.normalBg = "assets/bg_sanposan.png"; // New Castle BG
             this.bgImage.src = this.normalBg;
 
             // Opening Sequence
@@ -192,159 +199,7 @@ export class Game {
         }
     }
 
-    showTitleButton() {
-        // Create or Show Button
-        let btn = document.getElementById('hud-return-btn');
-        if (!btn) {
-            btn = document.createElement('button');
-            btn.id = 'hud-return-btn';
-            btn.textContent = '✕'; // Icon-like text (or use an SVG/Image if preferred, X is simple for Stop)
-            btn.title = 'プレイストップ';
-            btn.style.position = 'absolute';
-            btn.style.bottom = '20px'; // Bottom
-            btn.style.left = '20px';   // Left
-            btn.style.top = 'auto';    // Reset Top
-            btn.style.width = '50px';
-            btn.style.height = '50px';
-            btn.style.padding = '0';
-            btn.style.background = 'rgba(255, 60, 60, 0.9)';
-            btn.style.color = '#fff';
-            btn.style.border = '3px solid #fff';
-            btn.style.borderRadius = '50%'; // Round
-            btn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4)';
-            btn.style.cursor = 'pointer';
-            btn.style.zIndex = '99999';
-            btn.style.fontFamily = 'Arial, sans-serif';
-            btn.style.fontSize = '24px';
-            btn.style.fontWeight = 'bold';
-            btn.style.display = 'flex';
-            btn.style.justifyContent = 'center';
-            btn.style.alignItems = 'center';
-            btn.style.pointerEvents = 'auto';
-            btn.onclick = (e) => {
-                e.stopPropagation();
-                if (confirm('タイトル画面に戻りますか？')) {
-                    location.reload();
-                }
-            };
-            // Append to UI Layer or HUD to ensure it sits with other UI
-            const uiLayer = document.getElementById('ui-layer');
-            if (uiLayer) {
-                uiLayer.appendChild(btn);
-            } else {
-                document.body.appendChild(btn);
-            }
-        }
-        btn.style.display = 'block';
-    }
-
-    hideTitleButton() {
-        const btn = document.getElementById('hud-return-btn');
-        if (btn) btn.style.display = 'none';
-    }
-
-
-
-    triggerEX() {
-        if (this.cutInActive) return;
-
-        this.exSystem.reset();
-        this.cutInActive = true;
-        this.cutInTimer = 2.0; // 2 seconds animation
-        // Use Leader Name
-        this.cutInText = `${this.team[0].name} のEXわざ！`;
-
-        const leaderName = this.team[0].name;
-
-        if (leaderName === 'まほうつかい') {
-            // Mage EX: 20s Damage Buff (1 hit)
-            this.mageDamageBuffTime = 20; // seconds
-            this.currentBuffMaxTime = 20;
-        } else if (leaderName === 'ドラゴン') {
-            // Dragon EX: 30s Medal Buff (5x)
-            this.dragonMedalBuffTime = 30; // seconds
-            this.currentBuffMaxTime = 30;
-        } else {
-            // Warrior (Default): Clear Screen
-            this.targets.forEach(t => {
-                if (t.type === 'BOSS') return; // Immune to EX
-                t.hit(50); // Massive damage to normal mobs
-                this.createExplosion(t.x, t.y, '#fff', 5);
-                this.medalSystem.modify(t.value);
-            });
-            // Filter out dead targets
-            this.targets = this.targets.filter(t => t.active);
-        }
-    }
-
-    reset() {
-        this.state = 'TITLE';
-        this.bullets = [];
-        this.targets = [];
-        this.boss = null;
-        this.mageDamageBuffTime = 0;
-        this.dragonMedalBuffTime = 0;
-        this.hideTitleButton();
-    }
-
-    tryShoot() {
-        if (this.cutInActive || this.storyActive) return; // No shooting during cut-in or story
-        const now = Date.now();
-        if (now - this.lastShotTime > this.fireRate && this.inputDown) {
-            this.shoot();
-            this.lastShotTime = now;
-        }
-    }
-
-    shoot() {
-        if (this.medalSystem.count <= 0) return;
-
-        const leader = this.team[0];
-        let cost = 1;
-        if (leader.name === 'ドラゴン') cost = 3;
-
-        if (this.medalSystem.count < cost) return;
-
-        this.medalSystem.modify(-cost);
-        this.medalsSpentInStage += cost;
-        this.audio.playShoot();
-
-        const startX = this.width / 2;
-        const startY = this.height - 50;
-
-        // Shooter Position for Aiming Origin
-        let shooterX = startX;
-        if (leader.name === 'ドラゴン') {
-            shooterX = Math.max(30, Math.min(this.width - 30, this.inputPos.x));
-        }
-
-        if (leader.name === 'まほうつかい') {
-            // Mage: 3 Way Aimed
-            // Calculate angle to cursor
-            let baseAngle = -Math.PI / 2;
-            // Aim at cursor
-            baseAngle = Math.atan2(this.inputPos.y - startY, this.inputPos.x - startX);
-
-            const spread = Math.PI / 6; // 30 degrees spread
-            const angles = [baseAngle, baseAngle - spread, baseAngle + spread];
-            // User requested 12x multiplier. Base is 0.25. 0.25 * 12 = 3.
-            const dmg = this.mageDamageBuffTime > 0 ? 3 : 0.25;
-
-            angles.forEach(a => {
-                this.bullets.push(new Bullet(startX, startY, a, leader.name, leader.color, dmg));
-            });
-        } else if (leader.name === 'ドラゴン') {
-            // Dragon: Vertical only, High dmg
-            const angle = -Math.PI / 2; // Straight Up
-            this.bullets.push(new Bullet(shooterX, startY, angle, leader.name, leader.color, 3));
-        } else {
-            // Warrior (Default): Aimed
-            const targetX = this.inputPos.x + (Math.random() * 20 - 10);
-            const targetY = this.inputPos.y + (Math.random() * 20 - 10);
-            const angle = Math.atan2(targetY - startY, targetX - shooterX);
-            this.bullets.push(new Bullet(shooterX, startY, angle, leader.name, leader.color, 1));
-        }
-    }
+    // ... (omitted) ...
 
     spawnStageTarget(visualIndex) {
         // Change Substate
@@ -358,7 +213,8 @@ export class Game {
         // Change BG based on Visual Index
         // Visual Index: 0=Stage1, 1=Stage2, 2=Stage3, 3=Stage4, 4=Stage5
         if (this.stageInfo[visualIndex]) {
-            this.bgImage.src = this.stageInfo[visualIndex].bg;
+            const info = this.stageInfo[visualIndex];
+            this.bgImage.src = info.bg;
         }
 
         // Play Stage BGM
@@ -367,11 +223,12 @@ export class Game {
         const x = this.width / 2;
         const y = 100;
 
-
-        // Config for Boss (HP 50, Reward 250)
-        // Pass visualIndex for Boss Look
         const config = { hp: 50, reward: 250, stageNum: 3 }; // Enable moving logic
-        this.targets.push(new Target(x, y, 'BOSS', this.mobImage, config));
+        let bossImg = this.mobImage;
+        if (this.bossImages && this.bossImages[visualIndex]) {
+            bossImg = this.bossImages[visualIndex];
+        }
+        this.targets.push(new Target(x, y, 'BOSS', bossImg, config));
     }
 
     returnToNormalStage() {
@@ -393,6 +250,54 @@ export class Game {
         this.cutInActive = true;
         this.cutInTimer = 1.5;
         this.cutInText = 'STAGE RESET';
+    }
+
+    // UI: Show Title (Stop) Button
+    showTitleButton() {
+        let btn = document.getElementById('hud-return-btn');
+        if (!btn) {
+            btn = document.createElement('button');
+            btn.id = 'hud-return-btn';
+            btn.textContent = '✕';
+            btn.title = 'プレイストップ';
+            btn.style.position = 'absolute';
+            btn.style.bottom = '20px';
+            btn.style.left = '20px';
+            btn.style.width = '50px';
+            btn.style.height = '50px';
+            btn.style.padding = '0';
+            btn.style.background = 'rgba(255, 60, 60, 0.9)';
+            btn.style.color = '#fff';
+            btn.style.border = '3px solid #fff';
+            btn.style.borderRadius = '50%';
+            btn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4)';
+            btn.style.cursor = 'pointer';
+            btn.style.zIndex = '99999';
+            btn.style.fontFamily = 'Arial, sans-serif';
+            btn.style.fontSize = '24px';
+            btn.style.fontWeight = 'bold';
+            btn.style.display = 'flex';
+            btn.style.justifyContent = 'center';
+            btn.style.alignItems = 'center';
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                if (confirm('タイトル画面に戻りますか？')) {
+                    location.reload();
+                }
+            };
+            const uiLayer = document.getElementById('ui-layer');
+            if (uiLayer) {
+                uiLayer.appendChild(btn);
+            } else {
+                document.body.appendChild(btn);
+            }
+        }
+        btn.style.display = 'block';
+    }
+
+    hideTitleButton() {
+        const btn = document.getElementById('hud-return-btn');
+        if (btn) btn.style.display = 'none';
     }
 
     getStageConfig(stage) {
@@ -650,11 +555,8 @@ export class Game {
 
         // Background
         if (this.bgImage) {
-            // Fill contain or cover? Cover.
-            const scale = Math.max(this.width / this.bgImage.width, this.height / this.bgImage.height);
-            const x = (this.width / 2) - (this.bgImage.width / 2) * scale;
-            const y = (this.height / 2) - (this.bgImage.height / 2) * scale;
-            this.ctx.drawImage(this.bgImage, x, y, this.bgImage.width * scale, this.bgImage.height * scale);
+            // Fill Stretch (Show entire image)
+            this.ctx.drawImage(this.bgImage, 0, 0, this.width, this.height);
 
             // Dark Overlay for readability
             this.ctx.fillStyle = 'rgba(0,0,0,0.3)';

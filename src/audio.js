@@ -273,8 +273,10 @@ export class AudioManager {
 
         return {
             1: { bpm: 130, length: 8, drums: drumPattern, synths: s1_synths },
-            2: { bpm: 100, length: 8, drums: drumPattern, synths: s1_synths }, // Placeholder for others
-            3: { bpm: 160, length: 8, drums: drumPattern, synths: s1_synths }
+            2: { bpm: 100, length: 8, drums: drumPattern, synths: s1_synths }, // Fallback to S1 logic as placeholder
+            3: { bpm: 160, length: 8, drums: drumPattern, synths: s1_synths }  // Fallback to S1 logic as placeholder
         };
     }
 }
+
+
