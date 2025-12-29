@@ -100,6 +100,57 @@ export class Game {
         this.canvas.addEventListener('touchend', endInput);
     }
 
+    tryShoot() {
+        const now = Date.now();
+        if (now - this.lastShotTime < this.fireRate) return;
+
+        const leader = this.team && this.team[0] ? this.team[0] : { name: 'せんし' };
+        let cost = 1;
+        if (leader.name === 'ドラゴン') cost = 3;
+
+        // Check Cost
+        if (this.medalSystem.count < cost) {
+            return;
+        }
+
+        this.medalSystem.modify(-cost);
+        this.lastShotTime = now;
+        this.audio.playShoot();
+
+        // Spawn Bullets
+        let startX = this.width / 2;
+        const startY = this.height - 50;
+
+        if (leader.name === 'ドラゴン') {
+            startX = Math.max(30, Math.min(this.width - 30, this.inputPos.x));
+            // Dragon: Single vertical shot
+            const angle = -Math.PI / 2;
+            const damage = 3;
+            // Dragon Color #0f0
+            this.bullets.push(new Bullet(startX, startY, angle, leader.name, '#0f0', damage));
+        } else if (leader.name === 'まほうつかい') {
+            // Mage: 3 Way
+            const dx = this.inputPos.x - startX;
+            const dy = this.inputPos.y - startY;
+            const baseAngle = Math.atan2(dy, dx);
+            const spread = Math.PI / 6; // 30 deg
+            const angles = [baseAngle, baseAngle - spread, baseAngle + spread]; // Center, Left, Right
+
+            let damage = 0.25;
+            if (this.mageDamageBuffTime > 0) damage = 1; // Buff
+
+            angles.forEach(a => {
+                this.bullets.push(new Bullet(startX, startY, a, leader.name, '#00f', damage));
+            });
+        } else {
+            // Warrior: Single shot to cursor
+            const dx = this.inputPos.x - startX;
+            const dy = this.inputPos.y - startY;
+            const angle = Math.atan2(dy, dx);
+            this.bullets.push(new Bullet(startX, startY, angle, leader.name, '#f00', 1));
+        }
+    }
+
     updateInputPos(e) {
         const rect = this.canvas.getBoundingClientRect();
         this.inputPos.x = e.clientX - rect.left;
