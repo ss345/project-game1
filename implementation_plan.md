@@ -1,58 +1,16 @@
-# Security Enhancement Plan
+# Background Update Plan
 
 ## Goal Description
-Direct user request to ensure "high security" before web publication.
-Current state is a client-side static application.
-
-## Security Analysis
-| Category | Status | Risk | Notes |
-| :--- | :--- | :--- | :--- |
-| **Server Attacks** | N/A | None | No backend code exists to be hacked. |
-| **User Safety (XSS)** | Good | Low | No user input rendered. Vanilla JS used. |
-| **Network Security** | Pending | Med | Requires HTTPS upon deployment. |
-| **Game Integrity** | **Zero** | **High** | Logic is client-side. Users can trivially cheat (modify medals/stats). |
-
-> [!WARNING]
-> **Game Integrity Issue**: Since the game runs entirely in the browser, it is impossible to prevent a user from modifying their medal count or boss HP using browser developer tools. For "High Security" against cheating, the game logic must be moved to a server (Authoritative Server architecture), which is a complete rewrite.
-
-### User Interface
-#### [MODIFY] [index.html](file:///Users/SSS/.gemini/game/index.html)
-- Add "Return to Title" button to HUD.
-
-### Character Mechanics
-#### [MODIFY] [src/game.js](file:///Users/SSS/.gemini/game/src/game.js)
-- **Mage**: Update aiming logic to rotate shots towards cursor/touch.
-- **Boss Cycle Logic**:
-    - **Trigger Phase**: Trigger cycles visuals (1-5). Background does *not* change yet.
-    - **Trigger Death**: When Trigger dies, capture its current `visualIndex`.
-    - **Boss Spawn**: Spawn Boss. Change Background to the stage corresponding to the captured `visualIndex`.
-    - **Boss Stats**: HP 50. Time Limit 30s.
-    - **Boss Defeat**: Reward 250 Medals. Return to Normal Stage (Reset BG to Stage 1 or designated "Normal" BG? Revert to previous?). Despawn Boss.
-    - **Boss Timeout (30s)**: Boss disappears. Return to Normal Stage.
-    - **Reset**: When returning to Normal Stage (after Defeat or Timeout), respawn Boss Trigger (HP 100).
-    - **Cycle**: This loop repeats indefinitely. Boss Trigger -> Select Stage Boss -> Boss Battle -> Normal Stage -> Boss Trigger.
-
-### Verification Plan
-- Verify Background changes in sync with Trigger shape/color change.
-- Verify "Return to Title" button works.
-- Verify Mage aiming works.
+Set `bg_sanposan.png` as the main background image for the game, replacing the current default `bg1.png`.
 
 ## Proposed Changes
+### [src/game.js](file:///Users/SSS/.gemini/game/src/game.js)
+- Update `this.normalBg` to use `assets/bg_sanposan.png`.
+- Update the Stage 1 configuration ("のいち動物公園（三宝山）") to use `assets/bg_sanposan.png`.
 
-### 1. Content Security Policy (CSP)
-Hardening the frontend against potential script injection or asset loading attacks.
-
-#### [MODIFY] [index.html](file:///Users/SSS/.gemini/antigravity/brain/46791868-e271-4aaa-aa5e-ec0ad1d797a7/index.html)
-- Add `<meta http-equiv="Content-Security-Policy" ...>` tag.
-- Restrict sources to `'self'` and trusted domains (if any).
-
-### 2. Deployment Security Documentation
-Create a guide on safe hosting.
-
-#### [NEW] [security_guide.md](file:///Users/SSS/.gemini/antigravity/brain/46791868-e271-4aaa-aa5e-ec0ad1d797a7/security_guide.md)
-- HTTPS requirements.
-- Explanation of Client-side vs Server-side security.
-
-## Verification
-- W3C Validator check (manual step description).
-- Browser console check for CSP errors.
+## Verification Plan
+### Manual Verification
+1. Start the game.
+2. Verify the title screen/initial background shows the new Sanposan image.
+3. Start the battle.
+4. Verify Stage 1 background is the Sanposan image.

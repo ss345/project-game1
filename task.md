@@ -43,3 +43,7 @@
     - [x] Add Opening "Save Konan City" Sequence
     - [x] Map Stages to Specific Backgrounds & Names
     - [x] Display Stage Name on Entry
+- [x] Update Main Background to Sanposan
+    - [x] Change Default BG
+    - [x] Change Stage 1 BG
+
