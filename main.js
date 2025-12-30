@@ -57,7 +57,7 @@ window.addEventListener('load', () => {
                     <div>攻撃力: <span style="color:#ff0">${toStars(m.atk)}</span></div>
                     <div>発射数: <span style="color:#ff0">${toStars(m.bullets)}</span></div>
                     <div>コスト: <span style="color:#ff0">${toStars(m.cost)}</span></div>
-                    <div style="margin-top:4px; font-size:0.9em; border-top:1px solid #666; padding-top:2px;">BUFF: ${m.buff}</div>
+                    <div style="margin-top:4px; font-size:0.9em; border-top:1px solid #666; padding-top:2px;">効果: ${m.buff}</div>
                 </div>
             `;
             card.style.backgroundColor = m.color;

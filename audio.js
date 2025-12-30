@@ -75,6 +75,11 @@ export class AudioManager {
             osc.start(time);
             osc.stop(time + duration + 0.5);
             this.activeNodes.push(osc);
+            // Cleanup from list after stop
+            setTimeout(() => {
+                const idx = this.activeNodes.indexOf(osc);
+                if (idx > -1) this.activeNodes.splice(idx, 1);
+            }, (duration + 0.5) * 1000);
         });
 
         // Effect Sends
@@ -278,5 +283,3 @@ export class AudioManager {
         };
     }
 }
-
-

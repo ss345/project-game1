@@ -1,6 +1,9 @@
-import { Bullet, BossTrigger, RealBoss, Target, Particle } from './entities.js';
-import { MedalSystem, EXSystem } from './mechanics.js';
-import { AudioManager } from './audio.js';
+import { Bullet } from './entities/Bullet.js';
+import { BossTrigger, RealBoss } from './entities/Boss.js';
+import { Target } from './entities/Enemy.js';
+import { Particle } from './entities/Particle.js';
+import { MedalSystem, EXSystem } from './systems/mechanics.js';
+import { AudioManager } from './systems/audio.js';
 
 export class Game {
     constructor(canvas) {
@@ -65,6 +68,31 @@ export class Game {
         requestAnimationFrame(this.loop);
     }
 
+    reset() {
+        this.state = 'TITLE';
+        this.subState = 'NORMAL';
+        this.paused = false;
+        this.inputDown = false;
+        this.boss = null;
+        this.bullets = [];
+        this.targets = [];
+        this.particles = [];
+        this.audio.stopBGM();
+        this.exSystem.reset();
+
+        // Hide UI Elements
+        document.getElementById('hud').classList.add('hidden');
+        document.getElementById('pause-screen').classList.add('hidden');
+        document.getElementById('game-over-screen').classList.add('hidden');
+        document.getElementById('happy-ending-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.add('hidden');
+        this.hideTitleButton();
+
+        // Reset buffs
+        this.mageDamageBuffTime = 0;
+        this.dragonMedalBuffTime = 0;
+    }
+
     bindEvents() {
         const startInput = (e) => {
             if (this.state !== 'BATTLE') return;
@@ -98,6 +126,66 @@ export class Game {
             moveInput(e.touches[0]);
         }, { passive: false });
         this.canvas.addEventListener('touchend', endInput);
+    }
+
+    tryShoot() {
+        try {
+            const now = Date.now();
+            if (now - this.lastShotTime < this.fireRate) return;
+
+            const leader = this.team && this.team[0] ? this.team[0] : { name: 'せんし' };
+            let cost = 1;
+            if (leader.name === 'ドラゴン') cost = 3;
+
+            // Check Cost
+            if (this.medalSystem.count < cost) {
+                return;
+            }
+
+            // this.medalSystem.modify(-cost);
+            this.medalSystem.modify(-cost);
+            this.lastShotTime = now;
+
+            // Audio
+            this.audio.playShoot();
+
+            // Spawn Bullets
+            let startX = this.width / 2;
+            const startY = this.height - 50;
+
+            if (leader.name === 'ドラゴン') {
+                startX = Math.max(30, Math.min(this.width - 30, this.inputPos.x));
+                // Dragon: Single vertical shot
+                const angle = -Math.PI / 2;
+                const damage = 3;
+                // Dragon Color #0f0
+                this.bullets.push(new Bullet(startX, startY, angle, leader.name, '#0f0', damage));
+            } else if (leader.name === 'まほうつかい') {
+                // Mage: 3 Way
+                const dx = this.inputPos.x - startX;
+                const dy = this.inputPos.y - startY;
+                const baseAngle = Math.atan2(dy, dx);
+                const spread = Math.PI / 6; // 30 deg
+                const angles = [baseAngle, baseAngle - spread, baseAngle + spread]; // Center, Left, Right
+
+                let damage = 0.25;
+                if (this.mageDamageBuffTime > 0) damage = 1; // Buff
+
+                angles.forEach(a => {
+                    this.bullets.push(new Bullet(startX, startY, a, leader.name, '#00f', damage));
+                });
+            } else {
+                // Warrior: Single shot to cursor
+                const dx = this.inputPos.x - startX;
+                const dy = this.inputPos.y - startY;
+                const angle = Math.atan2(dy, dx);
+                this.bullets.push(new Bullet(startX, startY, angle, leader.name, '#f00', 1));
+            }
+        } catch (e) {
+            console.error('CRITICAL ERROR IN tryShoot (Stopping Input):', e);
+            this.inputDown = false; // Stop the loop!
+            alert('Game Error: ' + e.message); // Notify user visibly
+        }
     }
 
     updateInputPos(e) {
@@ -208,7 +296,7 @@ export class Game {
 
         this.cutInActive = true;
         this.cutInTimer = 2.0;
-        this.cutInText = `BOSS APPEARED!`;
+        this.cutInText = `ボス出現！`;
 
         // Change BG based on Visual Index
         // Visual Index: 0=Stage1, 1=Stage2, 2=Stage3, 3=Stage4, 4=Stage5
@@ -249,7 +337,7 @@ export class Game {
 
         this.cutInActive = true;
         this.cutInTimer = 1.5;
-        this.cutInText = 'STAGE RESET';
+        this.cutInText = 'ステージリセット';
     }
 
     // UI: Show Title (Stop) Button
@@ -475,7 +563,7 @@ export class Game {
             // Stage Clear Effect
             this.cutInActive = true;
             this.cutInTimer = 2.0;
-            this.cutInText = 'STAGE CLEAR!';
+            this.cutInText = 'ステージクリア！';
 
             // Change BG & Show Story
             const nextStageIdx = this.stage - 1;
@@ -695,8 +783,8 @@ export class Game {
             this.ctx.strokeStyle = '#000';
             this.ctx.lineWidth = 3;
             // Draw at top center
-            this.ctx.strokeText(`TIME: ${Math.ceil(this.bossTimer)}`, this.width / 2, 50);
-            this.ctx.fillText(`TIME: ${Math.ceil(this.bossTimer)}`, this.width / 2, 50);
+            this.ctx.strokeText(`残り: ${Math.ceil(this.bossTimer)}`, this.width / 2, 50);
+            this.ctx.fillText(`残り: ${Math.ceil(this.bossTimer)}`, this.width / 2, 50);
             this.ctx.restore();
         }
     }
